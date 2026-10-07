@@ -8,4 +8,4 @@ export const getCustomers = (params: CustomerQuery): Promise<Paginated<Customer>
   api.get<Paginated<Customer>>('/customers', { params: clean(params) }).then((r) => r.data);
 
 /** Aggregated KPIs: totals, status breakdown, top countries, 6-month revenue. */
-export const getKpis = (): Promise<Kpis> => api.get<{ data: Kpis }>('/customers/stats').then((r) => r.data.data);
+export const getKpis = (): Promise<Kpis> => api.get<{ data: Kpis }>('/stats').then((r) => r.data.data);

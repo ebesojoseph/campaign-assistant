@@ -1,11 +1,22 @@
 /** Domain + API types shared across features. Mirrors the backend's JSON contract. */
 
-export type Role = 'admin' | 'marketer';
-export type CustomerStatus = 'lead' | 'active' | 'vip' | 'inactive' | 'churned';
-export type Channel = 'email' | 'sms' | 'push' | 'whatsapp';
-export type Tone = 'professional' | 'friendly' | 'urgent' | 'playful' | 'luxury' | 'empathetic';
-export type CampaignStatus = 'draft' | 'approved' | 'scheduled' | 'sent' | 'archived';
-export type BadgeTone = 'slate' | 'green' | 'violet' | 'amber' | 'red' | 'blue';
+export type Role = "admin" | "marketer";
+export type CustomerStatus = "lead" | "active" | "vip" | "inactive" | "churned";
+export type Channel = "email" | "sms" | "push" | "whatsapp";
+export type Tone =
+  | "professional"
+  | "friendly"
+  | "urgent"
+  | "playful"
+  | "luxury"
+  | "empathetic";
+export type CampaignStatus =
+  | "draft"
+  | "approved"
+  | "scheduled"
+  | "sent"
+  | "archived";
+export type BadgeTone = "slate" | "green" | "violet" | "amber" | "red" | "blue";
 
 // ---------- API envelope ----------
 export interface PageMeta {
@@ -19,7 +30,11 @@ export interface Paginated<T> {
   meta: PageMeta;
 }
 export interface ApiErrorBody {
-  error: { code: string; message: string; details?: { field?: string; message: string }[] };
+  error: {
+    code: string;
+    message: string;
+    details?: { field?: string; message: string }[];
+  };
 }
 
 // ---------- auth ----------
@@ -33,7 +48,7 @@ export interface User {
 }
 export interface Session {
   accessToken: string;
-  tokenType?: 'Bearer';
+  tokenType?: "Bearer";
   expiresIn: number;
   user: User;
 }
@@ -61,24 +76,25 @@ export interface Customer {
   marketingOptIn: boolean;
   createdAt: string;
 }
-export type CustomerSortKey = 'createdAt' | 'lastName' | 'totalSpent' | 'orderCount' | 'lastPurchaseAt';
+export type CustomerSortKey =
+  | "createdAt"
+  | "lastName"
+  | "totalSpent"
+  | "orderCount"
+  | "lastPurchaseAt";
 export interface CustomerQuery {
   page: number;
   limit: number;
   search: string;
-  status: CustomerStatus | '';
+  status: CustomerStatus | "";
   sortBy: CustomerSortKey;
-  order: 'asc' | 'desc';
+  order: "asc" | "desc";
 }
 export interface Kpis {
   totalCustomers: number;
-  marketingOptIn: number;
-  payingCustomers: number;
-  totalRevenue: number;
-  avgLifetimeValue: number;
-  statusBreakdown: Partial<Record<CustomerStatus, number>>;
-  topCountries: { country: string; customers: number; revenue: number }[];
-  monthlyRevenue: { month: string; revenue: number }[];
+  activeCustomers: number;
+  totalTransactionValue: number;
+  avgCustomerValue: number;
 }
 
 // ---------- segments ----------
@@ -144,7 +160,9 @@ export interface GenerateCampaignPayload {
   additionalInstructions?: string;
   save?: boolean;
 }
-export type CampaignEdit = Partial<Pick<Campaign, 'subject' | 'preheader' | 'content' | 'callToAction'>>;
+export type CampaignEdit = Partial<
+  Pick<Campaign, "subject" | "preheader" | "content" | "callToAction">
+>;
 export interface CampaignStatusPayload {
   status: CampaignStatus;
   scheduledAt?: string;

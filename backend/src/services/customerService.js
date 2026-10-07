@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { Op } = require("sequelize");
+const { Op, col, fn, literal } = require("sequelize");
 import { Customer, CustomerTransaction, sequelize } from "../models/index.js";
 import { AppError } from "../utils/AppError.js";
 import { paginated, parsePagination } from "../utils/pagination.js";
@@ -17,6 +17,7 @@ export const SORTABLE = [
 export async function listCustomers(q) {
   const pg = parsePagination(q);
   const where = {};
+
   if (q.status) where.status = q.status;
   if (q.country) where.country = q.country;
   if (q.marketingOptIn !== undefined) where.marketingOptIn = q.marketingOptIn;
@@ -24,8 +25,29 @@ export async function listCustomers(q) {
     const like = { [Op.like]: `%${q.search.replace(/[%_\\]/g, "\\$&")}%` };
     where[Op.or] = [{ firstName: like }, { lastName: like }, { email: like }];
   }
+
   const { rows, count } = await Customer.findAndCountAll({
     where,
+    subQuery: false, // REQUIRED: Stops Sequelize from wrapping the query in an isolated inner SELECT
+    attributes: {
+      include: [
+        [
+          // Reference the alias 'transactions', not 'customer_transactions'
+          sequelize.fn("COALESCE", sequelize.fn("SUM", sequelize.col("transactions.amount")), 0),
+          "totalSpent",
+        ],
+      ],
+    },
+    include: [
+      {
+        model: CustomerTransaction,
+        as: "transactions", // Matches the col("transactions.amount") alias above
+        attributes: [],     // Keeps payload clean
+        duplicating: false, // Forces a simple LEFT OUTER JOIN
+      },
+    ],
+    group: ["Customer.id"], // Groups transactions per customer so SUM works correctly
+    distinct: true,
     limit: pg.limit,
     offset: pg.offset,
     order: [
@@ -33,7 +55,11 @@ export async function listCustomers(q) {
       ["id", "ASC"],
     ],
   });
-  return paginated(rows, count, pg);
+
+  // When grouping, Sequelize returns `count` as an array of objects. We extract the array length for pagination.
+  const totalCount = Array.isArray(count) ? count.length : count;
+
+  return paginated(rows, totalCount, pg);
 }
 
 export async function getCustomer(id) {

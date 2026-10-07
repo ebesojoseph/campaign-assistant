@@ -1,5 +1,5 @@
 export { CriteriaInput } from './components/CriteriaInput';
-export { SegmentBuilderForm } from './components/SegmentBuilderForm';
+export { SegmentBuilderModal} from './components/SegmentBuilderModal';
 export { SegmentList } from './components/SegmentList';
 export { SegmentPreviewPanel } from './components/SegmentPreviewPanel';
 export { useSegmentStore } from './store/useSegmentStore';

@@ -1,4 +1,4 @@
-export { CampaignForm } from './components/CampaignForm';
+export { CampaignModal } from './components/CampaignModal';
 export { CampaignList } from './components/CampaignList';
 export { CampaignStatusBadge } from './components/CampaignStatusBadge';
 export { GeneratedCampaignCard } from './components/GeneratedCampaignCard';

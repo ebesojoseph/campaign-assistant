@@ -93,7 +93,7 @@ export async function seedDatabase({ customerCount = 200, seed = 42 } = {}) {
 
   // --- admin ---
   let admin = null;
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "password";
   if (adminPassword) {
     const email = (
       process.env.SEED_ADMIN_EMAIL || "admin@dmesystems.com"
