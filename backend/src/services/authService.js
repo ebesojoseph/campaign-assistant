@@ -1,24 +1,34 @@
-import crypto from 'node:crypto';
-import { RefreshToken, sequelize } from '../models/index.js';
-import { createRequire } from 'node:module';
+import crypto from "node:crypto";
+import { RefreshToken, sequelize } from "../models/index.js";
+import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { Op } = require('sequelize');
-import { jwtConfig } from '../config/jwt.js';
-import { ROLES } from '../constants/index.js';
-import { AppError } from '../utils/AppError.js';
-import { comparePassword, getDummyHash, hashPassword } from '../utils/password.js';
+const { Op } = require("sequelize");
+import { jwtConfig } from "../config/jwt.js";
+import { ROLES } from "../constants/index.js";
+import { AppError } from "../utils/AppError.js";
+import {
+  comparePassword,
+  getDummyHash,
+  hashPassword,
+} from "../utils/password.js";
 import {
   accessTtlSeconds,
   hashToken,
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
-} from '../utils/tokens.js';
-import User from '../models/User.js';
+} from "../utils/tokens.js";
+import { User } from "../models/index.js";
 
-const invalidCredentials = () => new AppError(401, 'Invalid email or password', 'INVALID_CREDENTIALS');
-const invalidRefresh = () => new AppError(401, 'Invalid or expired refresh token', 'INVALID_REFRESH_TOKEN');
+const invalidCredentials = () =>
+  new AppError(401, "Invalid email or password", "INVALID_CREDENTIALS");
+const invalidRefresh = () =>
+  new AppError(
+    401,
+    "Invalid or expired refresh token",
+    "INVALID_REFRESH_TOKEN",
+  );
 
 async function issueTokens(user, meta = {}) {
   const jti = crypto.randomUUID();
@@ -42,9 +52,13 @@ async function issueTokens(user, meta = {}) {
     refreshExpiresAt: expiresAt,
   };
 }
-export async function registerUser({ name, email, password, role }, { bootstrap = false } = {}) {
+export async function registerUser(
+  { name, email, password, role },
+  { bootstrap = false } = {},
+) {
   const existing = await User.findOne({ where: { email } });
-  if (existing) throw new AppError(409, 'Email already registered', 'EMAIL_TAKEN');
+  if (existing)
+    throw new AppError(409, "Email already registered", "EMAIL_TAKEN");
 
   return User.create({
     name,
@@ -55,9 +69,12 @@ export async function registerUser({ name, email, password, role }, { bootstrap 
 }
 
 export async function loginUser({ email, password }, meta) {
-  const user = await User.scope('withPassword').findOne({ where: { email } });
+  const user = await User.scope("withPassword").findOne({ where: { email } });
   // Always run bcrypt so response time doesn't reveal whether the email exists.
-  const ok = await comparePassword(password, user?.passwordHash ?? (await getDummyHash()));
+  const ok = await comparePassword(
+    password,
+    user?.passwordHash ?? (await getDummyHash()),
+  );
   if (!user || !ok || !user.isActive) throw invalidCredentials();
 
   await user.update({ lastLoginAt: new Date() });
@@ -84,20 +101,34 @@ export async function refreshSession(token, meta) {
   if (!record || record.userId !== payload.sub) throw invalidRefresh();
 
   if (record.revokedAt) {
-    await RefreshToken.update({ revokedAt: new Date() }, { where: { userId: record.userId, revokedAt: null } });
-    throw new AppError(401, 'Refresh token reuse detected, please sign in again', 'REFRESH_TOKEN_REUSED');
+    await RefreshToken.update(
+      { revokedAt: new Date() },
+      { where: { userId: record.userId, revokedAt: null } },
+    );
+    throw new AppError(
+      401,
+      "Refresh token reuse detected, please sign in again",
+      "REFRESH_TOKEN_REUSED",
+    );
   }
-  if (record.tokenHash !== hashToken(token) || record.expiresAt < new Date()) throw invalidRefresh();
+  if (record.tokenHash !== hashToken(token) || record.expiresAt < new Date())
+    throw invalidRefresh();
 
   const user = await User.findByPk(record.userId);
   if (!user || !user.isActive) throw invalidRefresh();
 
   // Atomic claim: only one concurrent request can win the rotation.
-  const [claimed] = await RefreshToken.update({ revokedAt: new Date() }, { where: { id: record.id, revokedAt: null } });
+  const [claimed] = await RefreshToken.update(
+    { revokedAt: new Date() },
+    { where: { id: record.id, revokedAt: null } },
+  );
   if (!claimed) throw invalidRefresh();
 
   const tokens = await issueTokens(user, meta);
-  await RefreshToken.update({ replacedBy: tokens.jti }, { where: { id: record.id } });
+  await RefreshToken.update(
+    { replacedBy: tokens.jti },
+    { where: { id: record.id } },
+  );
   return { user, ...tokens };
 }
 
@@ -105,17 +136,25 @@ export async function revokeRefreshToken(token) {
   if (!token) return;
   try {
     const { jti } = verifyRefreshToken(token);
-    await RefreshToken.update({ revokedAt: new Date() }, { where: { id: jti, revokedAt: null } });
+    await RefreshToken.update(
+      { revokedAt: new Date() },
+      { where: { id: jti, revokedAt: null } },
+    );
   } catch {
     /* already invalid -> nothing to revoke */
   }
 }
 
 export const revokeAllForUser = (userId) =>
-  RefreshToken.update({ revokedAt: new Date() }, { where: { userId, revokedAt: null } });
+  RefreshToken.update(
+    { revokedAt: new Date() },
+    { where: { userId, revokedAt: null } },
+  );
 
 /** Housekeeping: delete tokens that expired more than a day ago. */
 export const purgeExpiredTokens = () =>
-  RefreshToken.destroy({ where: { expiresAt: { [Op.lt]: new Date(Date.now() - 24 * 3600 * 1000) } } });
+  RefreshToken.destroy({
+    where: { expiresAt: { [Op.lt]: new Date(Date.now() - 24 * 3600 * 1000) } },
+  });
 
 export { sequelize };

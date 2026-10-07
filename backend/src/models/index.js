@@ -19,7 +19,7 @@ User.hasMany(RefreshToken, { foreignKey: 'userId', as: 'refreshTokens', onDelete
 RefreshToken.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 Customer.hasMany(CustomerTransaction, { foreignKey: 'customerId', as: 'transactions', onDelete: 'CASCADE' });
-CustomerTransaction.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
+CustomerTransaction.belongsTo(Customer, { foreignKey: 'customerId', as: 'CustomerTransactions' });
 
 User.hasMany(Segment, { foreignKey: 'createdBy', as: 'segments', onDelete: 'SET NULL' });
 Segment.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });

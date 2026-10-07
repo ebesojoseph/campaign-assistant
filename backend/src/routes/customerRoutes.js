@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { CUSTOMER_STATUS, ROLES, enumValues } from '../constants/index.js';
-import * as controller from '../controllers/customerController.js';
+import * as customerController from '../controllers/customerController.js';
 import { authenticate, authorize } from '../middlewares/auth.js';
 import { idParam, partial, validate } from '../middlewares/validate.js';
 import { SORTABLE } from '../services/customerService.js';
@@ -36,10 +36,11 @@ const transactionSchema = {
 
 const router = Router();
 router.use(authenticate);
-router.get('/', validate(querySchema, 'query'), controller.list);
-router.post('/', validate(bodySchema), controller.create);
-router.get('/:id', idParam, controller.get);
-router.put('/:id', idParam, validate(partial(bodySchema)), controller.update);
-router.delete('/:id', idParam, authorize(ROLES.ADMIN), controller.remove);
-router.post('/:id/transactions', idParam, validate(transactionSchema), controller.addTransaction);
+router.get('/', validate(querySchema, 'query'), customerController.list);
+router.post('/', validate(bodySchema), customerController.create);
+router.get('/stats',customerController.getStats);
+router.get('/:id', idParam, customerController.get);
+router.put('/:id', idParam, validate(partial(bodySchema)), customerController.update);
+router.delete('/:id', idParam, authorize(ROLES.ADMIN), customerController.remove);
+router.post('/:id/transactions', idParam, validate(transactionSchema), customerController.addTransaction);
 export default router;
