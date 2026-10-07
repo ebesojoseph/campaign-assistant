@@ -21,15 +21,7 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <Alert>{error ? getErrorMessage(error) : null}</Alert>
         <KpiCards kpis={kpis} loading={loading} />
-        {kpis && (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <RevenueTrendChart data={kpis.monthlyRevenue} />
-            <StatusDistributionChart breakdown={kpis.statusBreakdown} />
-            <div className="lg:col-span-2">
-              <TopCountriesChart data={kpis.topCountries} />
-            </div>
-          </div>
-        )}
+        
         <CustomerTable />
       </div>
     </>
