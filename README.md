@@ -2,6 +2,8 @@
 
 An internal tool for DME Systems that helps a marketing team understand customer activity, build customer segments, and prepare targeted campaigns with AI-generated content.
 
+contain in here is not an exhaustive list of all the apis routes.  
+
 ## Features
 
 - **Customer dashboard**: list customers (name, country, total transactions, total spent, last activity, status) with summary KPIs.
@@ -367,3 +369,12 @@ Open the URL printed by the frontend dev server in your browser.
 | `backend/` | `npm run seed` | Seed mock data |
 | `backend/` | `npm run dev` | Run the API server |
 | `frontend/` | `npm run dev` | Run the UI |
+
+
+# AI Assistance
+
+I used opencode for project setup but it came woth alot of bugs and I had to switch to claude code. wrote a couple of test cases with claude and setup the basic files for the frontend and backend. 
+
+Generally I use Ai with caution because while it give code , it is more difficult to fix the code and make it work as it should. I tried to use ai to gain more time but it was the opposite , since I spent a huge chunk of the time debugging items I would have writing myself using the proper documentation. 
+
+Ai was useful for the frontend with creating the designs so I did not have to think much about how to design, only making changes when needed and setting it the file structure and the statemanagement.
