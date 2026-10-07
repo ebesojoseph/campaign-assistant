@@ -4,6 +4,7 @@ const require = createRequire(import.meta.url);
 const { DataTypes, Model } = require("sequelize");
 import { CUSTOMER_STATUS, enumValues } from "../constants/index.js";
 
+
 const money = (field) => ({
   type: DataTypes.DECIMAL(12, 2),
   allowNull: false,
@@ -40,16 +41,6 @@ export default (sequelize) => {
         type: DataTypes.ENUM(...enumValues(CUSTOMER_STATUS)),
         allowNull: false,
         defaultValue: CUSTOMER_STATUS.LEAD,
-      },
-      totalSpent: {
-        type: DataTypes.VIRTUAL,
-        async get() {
-          return (
-            (await sequelize.models.Transaction.sum("amount", {
-              where: { customerId: this.id },
-            })) || 0
-          );
-        },
       },
       orderCount: {
         type: DataTypes.INTEGER,

@@ -10,6 +10,7 @@ import morgan from "morgan";
 const app = express();
 
 app.disable("x-powered-by");
+console.log(env.trustProxy)
 if (env.trustProxy) app.set("trust proxy", env.trustProxy);
 
 app.use(securityHeaders);
